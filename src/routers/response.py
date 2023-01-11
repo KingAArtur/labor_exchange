@@ -23,5 +23,8 @@ async def response_job(
         response: ResponseInSchema,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)):
+    if current_user.is_company:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Только соискатели могут откликаться на вакансии!")
+
     response = await response_queries.response_job(db=db, response_scheme=response, current_user=current_user)
     return ResponseSchema.from_orm(response)
