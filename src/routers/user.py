@@ -43,3 +43,9 @@ async def update_user(
     new_user = await user_queries.update(db=db, user=old_user)
 
     return UserSchema.from_orm(new_user)
+
+
+@router.get("/me", response_model=UserSchema)
+async def me(
+        current_user: User = Depends(get_current_user)):
+    return UserSchema.from_orm(current_user)
