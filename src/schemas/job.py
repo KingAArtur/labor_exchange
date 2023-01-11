@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class JobSchema(BaseModel):
-    id: Optional[str] = None
+    id: Optional[int] = None
     user_id: int
     title: str
     description: str

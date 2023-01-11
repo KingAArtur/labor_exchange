@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class ResponseSchema(BaseModel):
-    id: Optional[str] = None
+    id: Optional[int] = None
     user_id: int
     job_id: int
 
