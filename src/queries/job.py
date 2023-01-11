@@ -29,3 +29,9 @@ async def get_job_by_id(db: AsyncSession, job_id: int) -> Optional[Job]:
     query = select(Job).where(Job.id == job_id).limit(1)
     res = await db.execute(query)
     return res.scalars().first()
+
+
+async def delete_job(db: AsyncSession, job: Job) -> Job:
+    await db.delete(job)
+    await db.commit()
+    return job
