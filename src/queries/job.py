@@ -35,3 +35,10 @@ async def delete_job(db: AsyncSession, job: Job) -> Job:
     await db.delete(job)
     await db.commit()
     return job
+
+
+async def update_job(db: AsyncSession, job: Job) -> Job:
+    db.add(job)
+    await db.commit()
+    await db.refresh(job)
+    return job

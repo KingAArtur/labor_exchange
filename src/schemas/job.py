@@ -17,20 +17,34 @@ class JobSchema(BaseModel):
         orm_mode = True
 
 
+def salary_is_not_negative(salary: int):
+    if salary < 0:
+        raise ValueError("Зарплата не может быть меньше нуля!")
+    return salary
+
+
+def salary_to_is_not_less_than_from(salary, values, **kwargs):
+    if 'salary_from' in values and salary < values["salary_from"]:
+        raise ValueError("Верхняя граница диапазона зарплаты не может быть меньше нижней границы!")
+    return salary
+
+
+class JobUpdateSchema(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    salary_from: Optional[int] = None
+    salary_to: Optional[int] = None
+    is_active: Optional[bool] = None
+
+    _salary_from_is_not_negative = validator('salary_from', allow_reuse=True)(salary_is_not_negative)
+    _salary_to_is_not_less_than_from = validator('salary_to', allow_reuse=True)(salary_to_is_not_less_than_from)
+
+
 class JobInSchema(BaseModel):
     title: str
     description: str
     salary_from: int
     salary_to: int
 
-    @validator("salary_from")
-    def salary_from_is_not_negative(cls, v):
-        if v < 0:
-            raise ValueError("Зарплата не может быть меньше нуля!")
-        return v
-
-    @validator("salary_to")
-    def salary_to_is_not_less_than_from(cls, v, values, **kwargs):
-        if 'salary_from' in values and v < values["salary_from"]:
-            raise ValueError("Верхняя граница диапазона зарплаты не может быть меньше нижней границы!")
-        return v
+    _salary_from_is_not_negative = validator('salary_from', allow_reuse=True)(salary_is_not_negative)
+    _salary_to_is_not_less_than_from = validator('salary_to', allow_reuse=True)(salary_to_is_not_less_than_from)
