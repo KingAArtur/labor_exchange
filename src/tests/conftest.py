@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from fixtures.users import UserFactory
 from fixtures.jobs import JobFactory
+from fixtures.responses import ResponseFactory
 from fastapi.testclient import TestClient
 from main import app
 import pytest
@@ -57,3 +58,4 @@ async def current_user(sa_session: AsyncSession):
 def setup_factories(sa_session: AsyncSession) -> None:
     UserFactory.session = sa_session
     JobFactory.session = sa_session
+    ResponseFactory.session = sa_session
