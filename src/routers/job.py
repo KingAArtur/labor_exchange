@@ -15,6 +15,8 @@ async def read_jobs(
         db: AsyncSession = Depends(get_db),
         limit: int = 100,
         skip: int = 0):
+    print('read_jobs!')
+    print(db)
     return await job_queries.get_all_jobs(db=db, limit=limit, skip=skip)
 
 
