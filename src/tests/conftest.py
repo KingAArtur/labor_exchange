@@ -1,18 +1,15 @@
 import asyncio
-from asyncio import get_event_loop
-
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from fixtures.users import UserFactory
 from fixtures.jobs import JobFactory
 from fixtures.responses import ResponseFactory
-from fastapi.testclient import TestClient
 from main import app
-import pytest
 import pytest_asyncio
 from unittest.mock import MagicMock
 from db_settings import SQLALCHEMY_DATABASE_URL
-from dependencies import get_db, get_current_user
+from httpx import AsyncClient
+from dependencies import get_db
 
 
 @pytest_asyncio.fixture()
@@ -44,8 +41,10 @@ async def sa_session():
 async def current_user(sa_session: AsyncSession):
     new_user = UserFactory.build()
     sa_session.add(new_user)
+
     await sa_session.commit()
     await sa_session.refresh(new_user)
+
     return new_user
 
 
@@ -58,8 +57,7 @@ def setup_factories(sa_session: AsyncSession) -> None:
 
 
 @pytest_asyncio.fixture()
-def client_app(sa_session):
+async def client_app(sa_session):
     app.dependency_overrides[get_db] = lambda: sa_session
-    client = TestClient(app, backend_options={"use_uvloop": True})
-    with client as c:
-        yield c
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client

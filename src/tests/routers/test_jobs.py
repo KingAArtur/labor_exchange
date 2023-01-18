@@ -1,58 +1,59 @@
 import pytest
+
+from core.security import create_access_token
 from routers import job_router
 from fixtures.users import UserFactory
 from fixtures.jobs import JobFactory
-from schemas import JobInSchema, JobUpdateSchema, JobSchema
-from pydantic import ValidationError
+from schemas import JobInSchema, TokenSchema
 from fastapi import HTTPException
-from queries import job as job_query
 
 
 @pytest.mark.asyncio
-async def test_read_jobs(client_app):
-    # some_user = UserFactory.build()
-    # sa_session.add(some_user)
-    # sa_session.flush()
-    #
-    # n_jobs = 10
-    # jobs = []
-    # for _ in range(n_jobs):
-    #     job = JobFactory.build()
-    #     job.user_id = some_user.id
-    #     jobs.append(job)
-    #     sa_session.add(job)
-    # sa_session.flush()
+async def test_read_jobs(sa_session, client_app):
+    some_user = UserFactory.build()
+    sa_session.add(some_user)
+    sa_session.flush()
 
-    # all_jobs = await job_query.get_all_jobs(db=sa_session)
-    all_jobs = client_app.get('/jobs')
-    #assert all_jobs
-   # assert len(all_jobs.json()) == n_jobs
-    # for job, received_job in zip(jobs, all_jobs):
-    #     assert job == received_job
-    #
-    # skip = 2
-    # limit = 5
-    # all_jobs = await job_query.get_all_jobs(sa_session, skip=skip, limit=limit)
-    # assert all_jobs
-    # assert len(all_jobs) == limit
-    # for job, received_job in zip(jobs[skip: skip + limit], all_jobs):
-    #     assert job == received_job
+    n_jobs = 10
+    jobs = []
+    for _ in range(n_jobs):
+        job = JobFactory.build()
+        job.user_id = some_user.id
+        jobs.append(job)
+        sa_session.add(job)
+    sa_session.flush()
+
+    all_jobs = await client_app.get('/jobs')
+    assert all_jobs
+    assert len(all_jobs.json()) == n_jobs
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip
 async def test_create_job_as_company(sa_session, client_app, current_user):
     current_user.is_company = True
     sa_session.add(current_user)
     sa_session.flush()
 
-    job = JobFactory.build()
+    job = JobFactory.build(salary_from=10, salary_to=20)
     sa_session.add(job)
     sa_session.flush()
+    job_schema = JobInSchema(
+        title=job.title,
+        description=job.description,
+        salary_from=job.salary_from,
+        salary_to=job.salary_to
+    )
 
-    created_job = job_router.post(url='/jobs', json=job)
+    token = TokenSchema(
+        access_token=create_access_token({"sub": current_user.email}),
+        token_type="Bearer"
+    )
+
+    client_app.headers["Authorization"] = f"Bearer {token.access_token}"
+
+    created_job = await client_app.post(url='/jobs', json=job_schema.dict())
     assert created_job
-    assert created_job.title == job.title
+    assert created_job.json()["title"] == job.title
 
 
 @pytest.mark.asyncio
