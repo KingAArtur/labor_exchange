@@ -1,10 +1,13 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import ValidationError
+
 from schemas import JobSchema, JobInSchema, JobUpdateSchema
 from dependencies import get_db, get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from queries import job as job_queries
 from models import Job, User
+from fastapi.encoders import jsonable_encoder
 
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
@@ -69,6 +72,18 @@ async def update_job(
     old_job.salary_from = job.salary_from if job.salary_from is not None else old_job.salary_from
     old_job.salary_to = job.salary_to if job.salary_to is not None else old_job.salary_to
     old_job.is_active = job.is_active if job.is_active is not None else old_job.is_active
+
+    try:
+        job_schema = JobSchema(
+            title=old_job.title,
+            description=old_job.description,
+            salary_from=old_job.salary_from,
+            salary_to=old_job.salary_to,
+            is_active=old_job.is_active
+        )
+    except ValidationError as err:
+        raise HTTPException(status_code=422, detail=jsonable_encoder(err.errors()))
+
 
     updated_job = await job_queries.update_job(db=db, job=old_job)
 

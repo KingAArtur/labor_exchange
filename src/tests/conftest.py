@@ -13,6 +13,7 @@ from db_settings import SQLALCHEMY_DATABASE_URL
 from httpx import AsyncClient
 from dependencies import get_db
 from schemas import TokenSchema
+from sqlalchemy.orm import make_transient
 
 
 @pytest_asyncio.fixture()
@@ -26,6 +27,7 @@ async def sa_session():
 
     async def mock_delete(instance):
         session.expunge(instance)
+        make_transient(instance)
         return await asyncio.sleep(0)
 
     session.commit = MagicMock(side_effect=session.flush)
