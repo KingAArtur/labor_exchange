@@ -14,7 +14,7 @@ class JobFactory(AsyncSQLAlchemyModelFactory):
     description = factory.Faker('paragraph', nb_sentences=3)
 
     salary_from = factory.Faker('pyint', min_value=100, max_value=1000000)
-    salary_to = factory.Faker('pyint', min_value=100, max_value=1000000)
+    salary_to = factory.LazyAttribute(lambda x: x.salary_from + 100)
 
     is_active = factory.Faker('pybool')
     created_at = factory.LazyFunction(datetime.utcnow)

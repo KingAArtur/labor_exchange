@@ -139,5 +139,5 @@ async def test_update_job_other_user(sa_session, client_app, current_user):
         is_active=not job.is_active
     )
 
-    updated_job = await client_app.put(url=f'/jobs?job_id={job.id}', json=job_update.dict())
+    updated_job = await client_app.put(url=f'/jobs?job_id={job.id}', json=job_update.dict(exclude_unset=True))
     assert updated_job.status_code == status.HTTP_403_FORBIDDEN

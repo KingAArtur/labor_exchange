@@ -40,6 +40,7 @@ async def delete_job(
         job_id: int,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)):
+
     old_job = await job_queries.get_job_by_id(db=db, job_id=job_id)
 
     if old_job is None:
@@ -59,8 +60,8 @@ async def update_job(
         job: JobUpdateSchema,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)):
-    old_job = await job_queries.get_job_by_id(db=db, job_id=job_id)
 
+    old_job = await job_queries.get_job_by_id(db=db, job_id=job_id)
     if old_job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Вакансия не найдена.")
 
@@ -79,11 +80,12 @@ async def update_job(
             description=old_job.description,
             salary_from=old_job.salary_from,
             salary_to=old_job.salary_to,
-            is_active=old_job.is_active
+            is_active=old_job.is_active,
+            user_id=old_job.user_id,
+            created_at=old_job.created_at
         )
     except ValidationError as err:
         raise HTTPException(status_code=422, detail=jsonable_encoder(err.errors()))
-
 
     updated_job = await job_queries.update_job(db=db, job=old_job)
 
