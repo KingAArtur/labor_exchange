@@ -18,9 +18,18 @@ async def read_jobs(
         db: AsyncSession = Depends(get_db),
         limit: int = 100,
         skip: int = 0):
-    print('read_jobs!')
-    print(db)
     return await job_queries.get_all_jobs(db=db, limit=limit, skip=skip)
+
+
+@router.get("/{job_id}", response_model=JobSchema)
+async def get_job_by_id(
+        job_id: int,
+        db: AsyncSession = Depends(get_db)):
+    job = await job_queries.get_job_by_id(db=db, job_id=job_id)
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Вакансия не найдена")
+
+    return JobSchema.from_orm(job)
 
 
 @router.post("", response_model=JobSchema)

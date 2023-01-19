@@ -27,6 +27,23 @@ async def test_read_jobs(sa_session, client_app):
 
 
 @pytest.mark.asyncio
+async def test_get_job_by_id(sa_session, client_app):
+    some_user = UserFactory.build()
+    sa_session.add(some_user)
+    sa_session.flush()
+
+    job = JobFactory.build()
+    job.user_id = some_user.id
+    sa_session.add(job)
+    sa_session.flush()
+
+    got_job = await client_app.get(f'/jobs/{job.id}')
+
+    assert got_job.json()['id'] == job.id
+    assert got_job.json()['title'] == job.title
+
+
+@pytest.mark.asyncio
 async def test_create_job_as_company(sa_session, client_app, current_user):
     current_user.is_company = True
     sa_session.add(current_user)
