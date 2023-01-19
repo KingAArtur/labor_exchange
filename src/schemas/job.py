@@ -4,14 +4,16 @@ from pydantic import BaseModel, validator
 
 
 def salary_is_not_negative(salary: int):
-    if salary < 0:
-        raise ValueError("Зарплата не может быть меньше нуля!")
+    if salary is not None:
+        if salary < 0:
+            raise ValueError("Зарплата не может быть меньше нуля!")
     return salary
 
 
 def salary_to_is_not_less_than_from(salary, values, **kwargs):
-    if 'salary_from' in values and salary < values["salary_from"]:
-        raise ValueError("Верхняя граница диапазона зарплаты не может быть меньше нижней границы!")
+    if salary is not None:
+        if 'salary_from' in values and values["salary_from"] is not None and salary < values["salary_from"]:
+            raise ValueError("Верхняя граница диапазона зарплаты не может быть меньше нижней границы!")
     return salary
 
 
@@ -31,6 +33,7 @@ class JobSchema(BaseModel):
 
     _salary_from_is_not_negative = validator('salary_from', allow_reuse=True)(salary_is_not_negative)
     _salary_to_is_not_less_than_from = validator('salary_to', allow_reuse=True)(salary_to_is_not_less_than_from)
+
 
 class JobUpdateSchema(BaseModel):
     title: Optional[str] = None

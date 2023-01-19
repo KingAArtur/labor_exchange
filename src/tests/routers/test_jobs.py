@@ -127,10 +127,9 @@ async def test_update_job(sa_session, client_app, current_user):
 
     job_update = JobUpdateSchema(
         title=job.title + '[updated]',
-        is_active=not job.is_active
+        is_active=not job.is_active,
     )
-
-    to_send = job_update.dict(exclude_unset=True)
+    to_send = job_update.dict()
 
     updated_job = await client_app.put(url=f'/jobs?job_id={job.id}', json=to_send)
     assert updated_job
@@ -152,6 +151,7 @@ async def test_update_job_other_user(sa_session, client_app):
         title=job.title + '[updated]',
         is_active=not job.is_active
     )
+    to_send = job_update.dict()
 
-    updated_job = await client_app.put(url=f'/jobs?job_id={job.id}', json=job_update.dict(exclude_unset=True))
+    updated_job = await client_app.put(url=f'/jobs?job_id={job.id}', json=to_send)
     assert updated_job.status_code == status.HTTP_403_FORBIDDEN
