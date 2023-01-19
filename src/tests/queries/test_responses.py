@@ -4,7 +4,6 @@ from fixtures.responses import ResponseFactory
 from fixtures.jobs import JobFactory
 from fixtures.users import UserFactory
 from schemas import ResponseInSchema
-from pydantic import ValidationError
 
 
 @pytest.mark.asyncio

@@ -82,9 +82,6 @@ async def test_delete_job(sa_session, client_app, current_user):
 
     deleted_job = await client_app.delete(url=f'/jobs?job_id={job_id}')
 
-    # TODO: этого не должно здесь быть!
-    sa_session.expunge(job)
-
     assert deleted_job.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -124,7 +121,7 @@ async def test_update_job(sa_session, client_app, current_user):
 
 
 @pytest.mark.asyncio
-async def test_update_job_other_user(sa_session, client_app, current_user):
+async def test_update_job_other_user(sa_session, client_app):
     other_user = UserFactory.build()
     sa_session.add(other_user)
     sa_session.flush()

@@ -3,7 +3,7 @@ import pytest
 from fixtures.users import UserFactory
 from fixtures.jobs import JobFactory
 from fixtures.responses import ResponseFactory
-from schemas import JobInSchema, JobUpdateSchema, ResponseInSchema
+from schemas import ResponseInSchema
 from fastapi import status
 
 
